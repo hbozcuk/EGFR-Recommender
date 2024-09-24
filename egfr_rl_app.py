@@ -15,7 +15,7 @@ from sklearn.preprocessing import StandardScaler
 import joblib
 
 # Load the trained model
-dqn_model = DQN.load("saved_rl_model.pth")  # Adjust this path to where the model is saved
+dqn_model = DQN.load("saved_rl_model.pth",device='auto')  # Adjust this path to where the model is saved
 
 # Load the saved scaler using joblib
 scaler = joblib.load("scaler.pkl")  # Ensure scaler.pkl is in the same repo or correct path
