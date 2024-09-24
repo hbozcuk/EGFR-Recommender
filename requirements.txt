@@ -1,0 +1,8 @@
+streamlit
+torch
+stable-baselines3
+scikit-learn
+pillow  # For image handling
+numpy
+joblib
+
