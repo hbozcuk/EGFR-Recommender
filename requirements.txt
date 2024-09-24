@@ -1,6 +1,6 @@
 streamlit
-torch==2.4.0+cpu
-stable-baselines3==2.4.0a9
+torch==2.4.0
+stable-baselines3==2.4.0
 scikit-learn
 pillow  # For image handling
 numpy
