@@ -1,5 +1,5 @@
 streamlit
-torch=2.4.0
+torch==2.4.0
 stable-baselines3
 scikit-learn
 pillow  # For image handling
