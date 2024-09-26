@@ -10,15 +10,32 @@ Created on Tue Sep 24 15:39:19 2024
 import streamlit as st
 import torch
 import numpy as np
-from stable_baselines3 import DQN
 from sklearn.preprocessing import StandardScaler
 import joblib
+from gymnasium import spaces
+from stable_baselines3.dqn.policies import DQNPolicy
 
-# Load the trained model
-dqn_model = DQN.load("clean_rl_model.pth", device='auto')  # Adjust this path to where the model is saved
+# Define observation_space and action_space
+number_of_features = 10  # Adjust based on your actual number of features
+observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(number_of_features,), dtype=np.float32)
+action_space = spaces.Discrete(4)
+
+def dummy_schedule(_):
+    return 1e-4  # Learning rate schedule isn't used during inference
+
+# Recreate the policy network
+policy = DQNPolicy(
+    observation_space=observation_space,
+    action_space=action_space,
+    lr_schedule=dummy_schedule,
+    net_arch=[64, 64]  # Use the same architecture as during training
+)
+
+# Load the policy parameters
+policy.load_state_dict(torch.load("dqn_policy.pth", map_location=torch.device('cpu')))
 
 # Load the saved scaler using joblib
-scaler = joblib.load("scaler.pkl")  # Ensure scaler.pkl is in the same repo or correct path
+scaler = joblib.load("scaler.pkl")  # Ensure scaler.pkl is in the same directory
 
 with st.sidebar:
     add_subheader = st.subheader("Reinforcement Learning based recommender system to get EGFR TKI treatment feedback for EGFR mutant NSCLC cases.")
@@ -30,10 +47,10 @@ with st.sidebar:
 # Define a function to recommend a treatment based on patient features
 def recommend_treatment(patient_features):
     # Convert the patient features to a PyTorch tensor
-    state_tensor = torch.tensor(patient_features, dtype=torch.float32).unsqueeze(0).to(dqn_model.device)
+    state_tensor = torch.tensor(patient_features, dtype=torch.float32).unsqueeze(0)
     
     # Get the Q-values for the patient features (state)
-    q_values = dqn_model.q_net(state_tensor)
+    q_values = policy.q_net(state_tensor)
     
     # Select the action with the highest Q-value
     recommended_action = torch.argmax(q_values).item()
@@ -76,10 +93,8 @@ smoking_status_value = 1 if smoking_status == 'Ever smoker' else 0
 patient_features = [log_age, log_nlr, gender_value, ecog_cat_value, mutation_status_value, number_mets_value,
                     bone_or_liver_met_value, brain_met_value, comorbidity_value, smoking_status_value  ]
 
-# Normalize features (if required based on training normalization)
-# Assuming you used StandardScaler for normalizing the training data, apply it here:
-scaler = StandardScaler()
-scaled_features = scaler.fit_transform([patient_features])
+# Normalize features using the loaded scaler
+scaled_features = scaler.transform([patient_features])
 
 # Predict the recommended treatment when the user clicks the button
 if st.button('Get Treatment Recommendation'):

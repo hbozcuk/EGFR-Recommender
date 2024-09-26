@@ -1,8 +1,9 @@
 streamlit
-torch==2.4.0
-stable-baselines3
+torch==2.0.1
+stable-baselines3==2.3.2
 scikit-learn
-pillow  # For image handling
+pillow
 numpy
 joblib
+gymnasium
 
