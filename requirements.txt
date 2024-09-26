@@ -1,9 +1,8 @@
 streamlit
 torch==2.0.1
-stable-baselines3==2.3.2
+stable-baselines3==1.8.0
 scikit-learn
 pillow
 numpy
 joblib
-gymnasium
-
+gymnasium==0.29.0
