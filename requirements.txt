@@ -1,8 +1,9 @@
 streamlit
 torch==2.0.1
-stable-baselines3==1.8.0
+stable-baselines3==2.3.2
 scikit-learn
 pillow
 numpy
 joblib
-gymnasium==0.29.0
+gymnasium==0.29.0  # Gymnasium should be compatible
+setuptools>=42.0.0
