@@ -84,23 +84,24 @@ log_age = np.log(age) # Apply log transformation to age
 # Input for neutrophil and lymphocyte counts
 neutrophil = st.text_input("Neutrophil count (x1000/mm3)")  # Neutrophil count
 lymphocyte = st.text_input("Lymphocyte count (x1000/mm3)")  # Lymphocyte count
-# Check if inputs are provided and convert to float
-try:
-    neutrophil = float(neutrophil)
-    lymphocyte = float(lymphocyte)
 
-    # Ensure lymphocyte is not zero to avoid division by zero error
-    if lymphocyte > 0:
-        log_nlr = np.log(neutrophil / lymphocyte)  # Logarithmic transformation
-    else:
-        st.error("Lymphocyte count must be greater than 0.")
+# Only perform validation if both inputs are not empty
+if neutrophil and lymphocyte:
+    try:
+        neutrophil = float(neutrophil)
+        lymphocyte = float(lymphocyte)
+
+        # Ensure lymphocyte is not zero to avoid division by zero error
+        if lymphocyte > 0:
+            log_nlr = np.log(neutrophil / lymphocyte)  # Logarithmic transformation
+        else:
+            st.error("Lymphocyte count must be greater than 0.")
+            log_nlr = None
+    except ValueError:
+        st.error("Please enter valid numeric values for neutrophil and lymphocyte counts.")
         log_nlr = None
-except ValueError:
-    st.error("Please enter valid numeric values for neutrophil and lymphocyte counts.")
-    log_nlr = None
-
-
-#line_of_treatment = st.selectbox('Line of Treatment', ('1st Line', '2nd Line or Higher'))  # Line of Treatment
+else:
+    log_nlr = None  # Avoids any warning if input is not provided yet
 
 # Process categorical inputs into numerical values (assuming 0/1 encoding)
 gender_value = 1 if gender == 'Male' else 0
