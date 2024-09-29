@@ -83,7 +83,14 @@ log_age = np.log(age) # Apply log transformation to age
 
 neutrophil = st.text_input("Neutrophil count (x1000/mm3)") #Neutrophil count
 lymphocyte = st.text_input("Lymphocyte count (x1000/mm3)") #Lymphocyte count
-log_nlr = np.log(neutrophil/lymphocyte) #logarithmic transformation of neutrophil to lymphocyte ratio
+try:
+    # Convert to float and calculate log_nlr
+    neutrophil = float(neutrophil)
+    lymphocyte = float(lymphocyte)
+    log_nlr = np.log(neutrophil / lymphocyte)  # Logarithmic transformation
+except ValueError:
+    st.error("Please enter valid numeric values for neutrophil and lymphocyte counts.")
+    log_nlr = None
 
 line_of_treatment = st.selectbox('Line of Treatment', ('1st Line', '2nd Line or Higher'))  # Line of Treatment
 
