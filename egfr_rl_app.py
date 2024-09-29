@@ -47,7 +47,7 @@ scaler = joblib.load("scaler.pkl")  # Ensure scaler.pkl is in the same directory
 
 with st.sidebar:
     add_subheader = st.subheader("Reinforcement Learning based advisory system to guide EGFR TKI treatment for EGFR mutant NSCLC cases.")
-    add_text = st.write("This is an AI application using Reinforcement Learning to guide treatment in patients with advanced, EGFR mutant NSCLC. Developed as an experimental tool for medical oncologists by Hakan Şat Bozcuk, MD, using data from 300+ EGFR mutant advanced NSCLC patients .")
+    add_text = st.write("This is an AI application using Reinforcement Learning to guide treatment in patients with advanced, EGFR mutant NSCLC. Developed as an experimental tool for medical oncologists by Hakan Şat Bozcuk, MD, using data from 300+ EGFR mutant advanced NSCLC patients . This app aims to maximise progression free survival with TKI usage, in TKI naive patients.")
     from PIL import Image
     img = Image.open("image.jpg")
     st.image(img, width=300, caption="AI recommending treatment for NSCLC (Image by DALL-E)")
@@ -64,7 +64,7 @@ bone_or_liver_met = st.selectbox('Bone or liver metastases', ('Absent', 'Present
 brain_met = st.selectbox('Brain metastases', ('Absent', 'Present')) #Presence of brain metastases
 comorbidity = st.selectbox('Comorbidities', ('Absent', 'Present')) #Presence of comorbidities
 smoking_status = st.selectbox('Smoking status', ('Never smoker', 'Ever smoker')) #Smoking history
-previous_treatment = st.selectbox('Has this patient recieved prior TKI or chemotherapy?', ('Yes', 'No')) #any treatment before?
+previous_treatment = st.selectbox('Has this patient recieved prior chemotherapy?', ('Yes', 'No')) #any treatment before?
 
 age = st.slider('Age', 18, 90, 60)  # Age: slider from 18 to 100
 log_age = np.log(age) # Apply log transformation to age
