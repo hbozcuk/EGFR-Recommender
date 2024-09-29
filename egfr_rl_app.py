@@ -47,7 +47,7 @@ scaler = joblib.load("scaler.pkl")  # Ensure scaler.pkl is in the same directory
 
 with st.sidebar:
     add_subheader = st.subheader("Reinforcement Learning based recommender system to get EGFR TKI treatment feedback for EGFR mutant NSCLC cases.")
-    add_text = st.write("This is an AI application using Reinforcement Learning to guide treatment in patients with advanced, EGFR mutant NSCLC. Developed as an experimental tool in 300+ EGFR mutant advanced NSCLC patients for medical oncologists by Hakan Şat Bozcuk, MD.")
+    add_text = st.write("This is an AI application using Reinforcement Learning to guide treatment in patients with advanced, EGFR mutant NSCLC. Developed as an experimental tool for medical oncologists by Hakan Şat Bozcuk, MD, using data from 300+ EGFR mutant advanced NSCLC patients .")
     from PIL import Image
     img = Image.open("image.jpg")
     st.image(img, width=300, caption="AI recommending treatment for NSCLC (Image by DALL-E)")
