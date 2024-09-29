@@ -81,16 +81,24 @@ smoking_status = st.selectbox('Smoking status', ('Never smoker', 'Ever smoker'))
 age = st.slider('Age', 18, 90, 60)  # Age: slider from 18 to 100
 log_age = np.log(age) # Apply log transformation to age
 
-neutrophil = st.text_input("Neutrophil count (x1000/mm3)") #Neutrophil count
-lymphocyte = st.text_input("Lymphocyte count (x1000/mm3)") #Lymphocyte count
+# Input for neutrophil and lymphocyte counts
+neutrophil = st.text_input("Neutrophil count (x1000/mm3)")  # Neutrophil count
+lymphocyte = st.text_input("Lymphocyte count (x1000/mm3)")  # Lymphocyte count
+# Check if inputs are provided and convert to float
 try:
-    # Convert to float and calculate log_nlr
     neutrophil = float(neutrophil)
     lymphocyte = float(lymphocyte)
-    log_nlr = np.log(neutrophil / lymphocyte)  # Logarithmic transformation
+
+    # Ensure lymphocyte is not zero to avoid division by zero error
+    if lymphocyte > 0:
+        log_nlr = np.log(neutrophil / lymphocyte)  # Logarithmic transformation
+    else:
+        st.error("Lymphocyte count must be greater than 0.")
+        log_nlr = None
 except ValueError:
     st.error("Please enter valid numeric values for neutrophil and lymphocyte counts.")
     log_nlr = None
+
 
 line_of_treatment = st.selectbox('Line of Treatment', ('1st Line', '2nd Line or Higher'))  # Line of Treatment
 
