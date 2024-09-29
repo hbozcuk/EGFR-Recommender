@@ -139,7 +139,7 @@ st.title("EGFR Mutant NSCLC Treatment Advisory System")
 # Collect patient features and compute as before...
 
 # Predict the recommended treatment when the user clicks the button
-if st.button('Get Treatment Recommendation'):
+if st.button('Get Treatment Recommendation', key='recommend_button'):
     recommended_action, second_best_action = recommend_treatment(scaled_features.flatten(), previous_treatment_value)
     
     # Display the best treatment recommendation
@@ -162,18 +162,3 @@ if st.button('Get Treatment Recommendation'):
     elif second_best_action == 3:
         st.info("Reinforcement Learning Recommended Treatment (Second Best): 2nd or later line, 2nd or higher generation TKI")
 
-# Predict the recommended treatment when the user clicks the button
-if st.button('Get Treatment Recommendation'):
-    recommended_action = recommend_treatment(scaled_features.flatten())
-    
-    # Display the treatment recommendation
-    if recommended_action == 0:
-        st.success("Reinforcement Learning Recommended Treatment: 1st line, 1st generation TKI")
-    elif recommended_action == 1:
-        st.success("Reinforcement Learning Recommended Treatment: 1st line, 2nd or higher generation TKI")
-    elif recommended_action == 2:
-        st.success("Reinforcement Learning Recommended Treatment: 2nd or later Line, 1st generation TKI")
-    elif recommended_action == 3:
-        st.success("Reinforcement Learning Recommended Treatment: 2nd or later line, 2nd or higher generation TKI")
-    else:
-        st.error("No valid recommendation found.")
