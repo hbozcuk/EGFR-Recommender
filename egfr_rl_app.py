@@ -100,7 +100,7 @@ except ValueError:
     log_nlr = None
 
 
-line_of_treatment = st.selectbox('Line of Treatment', ('1st Line', '2nd Line or Higher'))  # Line of Treatment
+#line_of_treatment = st.selectbox('Line of Treatment', ('1st Line', '2nd Line or Higher'))  # Line of Treatment
 
 # Process categorical inputs into numerical values (assuming 0/1 encoding)
 gender_value = 1 if gender == 'Male' else 0
