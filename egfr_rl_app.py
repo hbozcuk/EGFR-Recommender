@@ -46,7 +46,7 @@ policy.load_state_dict(torch.load("dqn_policy.pth", map_location=torch.device('c
 scaler = joblib.load("scaler.pkl")  # Ensure scaler.pkl is in the same directory
 
 with st.sidebar:
-    add_subheader = st.subheader("Reinforcement Learning based recommender system to get EGFR TKI treatment feedback for EGFR mutant NSCLC cases.")
+    add_subheader = st.subheader("Reinforcement Learning based advisory system to guide EGFR TKI treatment for EGFR mutant NSCLC cases.")
     add_text = st.write("This is an AI application using Reinforcement Learning to guide treatment in patients with advanced, EGFR mutant NSCLC. Developed as an experimental tool for medical oncologists by Hakan Şat Bozcuk, MD, using data from 300+ EGFR mutant advanced NSCLC patients .")
     from PIL import Image
     img = Image.open("image.jpg")
