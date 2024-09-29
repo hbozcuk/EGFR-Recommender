@@ -23,11 +23,6 @@ port = int(os.environ.get('PORT', 8501))
 # Set the Streamlit server port and address
 st.set_page_config(layout="wide")  # Optional: Set the page layout
 
-# Update the server configuration
-st_server = st.server.server.Server.get_current()
-if st_server:
-    st_server.server_address = ('0.0.0.0', port)
-
 # Define observation_space and action_space
 number_of_features = 10  # Adjust based on your actual number of features
 observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(number_of_features,), dtype=np.float32)
