@@ -133,9 +133,6 @@ def recommend_treatment(patient_features, previous_treatment_value):
     
     return recommended_action, second_best_action
 
-# Streamlit web interface
-st.title("EGFR Mutant NSCLC Treatment Advisory System")
-
 # Collect patient features and compute as before...
 
 # Predict the recommended treatment when the user clicks the button
