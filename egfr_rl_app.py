@@ -62,7 +62,7 @@ def boltzmann_action_selection(q_values, tau=9.0):
     return np.random.choice(range(len(q_values)), p=probabilities)
 
 with st.sidebar:
-    add_subheader = st.subheader("Reinforcement Learning based advisory system to guide EGFR TKI treatment for EGFR mutant NSCLC cases.")
+    add_subheader = st.subheader("Reinforcement Learning based advisory system to guide EGFR TKI treatment for EGFR mutant, TKI naive, NSCLC cases.")
     add_text = st.write("This is an AI application using Reinforcement Learning to guide treatment in patients with advanced, EGFR mutant NSCLC. Developed as an experimental tool for medical oncologists by Hakan Şat Bozcuk, MD, using data from 300+ EGFR mutant advanced NSCLC patients. This app aims to maximize progression free survival with TKI usage, in TKI naive patients.")
     from PIL import Image
     img = Image.open("image.jpg")
