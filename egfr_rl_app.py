@@ -133,12 +133,18 @@ def recommend_treatment(patient_features, previous_treatment_value):
     # Get the Q-values for the patient features (state)
     q_values = policy.q_net(state_tensor).cpu().detach().numpy().flatten()
     
-    # Use Boltzmann exploration with tau=9 for action selection
-    recommended_action = boltzmann_action_selection(q_values, tau=9)
-
-    # Get the second-best action
-    top_two_indices = np.argsort(q_values)[-2:]  # Top 2 Q-values
-    second_best_action = top_two_indices[0] if top_two_indices[1] == recommended_action else top_two_indices[1]
+    # If previous treatment exists, restrict to actions 2 or 3
+    if previous_treatment_value == 1:
+        valid_actions = [2, 3]
+        q_values = q_values[valid_actions]  # Select only valid actions (2, 3)
+        recommended_action = boltzmann_action_selection(q_values, tau=9)  # Use Boltzmann exploration
+        second_best_action = valid_actions[1 - valid_actions.index(recommended_action)]  # Other valid action
+    else:
+        # Use Boltzmann exploration with tau=9 for action selection among all actions (0, 1, 2, 3)
+        recommended_action = boltzmann_action_selection(q_values, tau=9)
+        # Get the second-best action
+        top_two_indices = np.argsort(q_values)[-2:]  # Top 2 Q-values
+        second_best_action = top_two_indices[0] if top_two_indices[1] == recommended_action else top_two_indices[1]
 
     return recommended_action, second_best_action
 
