@@ -153,7 +153,14 @@ def recommend_treatment(patient_features, previous_treatment_value):
         # Get the second-best action
         top_two_indices = np.argsort(q_values)[-2:]  # Top 2 Q-values
         second_best_action = top_two_indices[0] if top_two_indices[1] == recommended_action else top_two_indices[1]
-
+        
+        # Favor action 1 more, followed by action 3
+        if previous_treatment_value == 0:
+            if recommended_action == 1:
+                q_values[1] += 3  # Favor action 1 more
+            elif recommended_action == 3:
+                q_values[3] += 2  # Slight boost for action 3
+    
     return recommended_action, second_best_action
 
 # Predict the recommended treatment when the user clicks the button
