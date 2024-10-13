@@ -45,13 +45,29 @@ policy.load_state_dict(torch.load("dqn_policy.pth", map_location=torch.device('c
 # Load the saved scaler using joblib
 scaler = joblib.load("scaler.pkl")  # Ensure scaler.pkl is in the same directory
 
+# Boltzmann action selection function with tau=9
+def boltzmann_action_selection(q_values, tau=9.0):
+    # Ensure no NaN values in Q-values
+    if np.isnan(q_values).any():
+        raise ValueError("Q-values contain NaN. Check the model outputs.")
+    
+    # Subtract the max Q-value for numerical stability
+    q_values_stable = q_values - np.max(q_values)
+    
+    # Apply Boltzmann exploration (softmax with temperature tau)
+    exp_q_values = np.exp(q_values_stable / tau)
+    probabilities = exp_q_values / np.sum(exp_q_values)
+
+    # Select an action based on the probabilities
+    return np.random.choice(range(len(q_values)), p=probabilities)
+
 with st.sidebar:
     add_subheader = st.subheader("Reinforcement Learning based advisory system to guide EGFR TKI treatment for EGFR mutant NSCLC cases.")
-    add_text = st.write("This is an AI application using Reinforcement Learning to guide treatment in patients with advanced, EGFR mutant NSCLC. Developed as an experimental tool for medical oncologists by Hakan Şat Bozcuk, MD, using data from 300+ EGFR mutant advanced NSCLC patients . This app aims to maximise progression free survival with TKI usage, in TKI naive patients.")
+    add_text = st.write("This is an AI application using Reinforcement Learning to guide treatment in patients with advanced, EGFR mutant NSCLC. Developed as an experimental tool for medical oncologists by Hakan Şat Bozcuk, MD, using data from 300+ EGFR mutant advanced NSCLC patients. This app aims to maximize progression free survival with TKI usage, in TKI naive patients.")
     from PIL import Image
     img = Image.open("image.jpg")
     st.image(img, width=300, caption="AI recommending treatment for NSCLC (Image by DALL-E)")
-    
+
 # Streamlit web interface
 st.title("EGFR Mutant NSCLC Treatment Advisory System")
 
@@ -59,15 +75,15 @@ st.title("EGFR Mutant NSCLC Treatment Advisory System")
 gender = st.selectbox('Gender', ('Female', 'Male'))  # Gender: Male or Female
 ecog_cat = st.selectbox('ECOG score', ('0 or 1', '2 to 4'))  # ECOG PS from 0 to 4
 mutation_status = st.selectbox('EGFR mutation status', ('Exon 19 mutation only', 'Other EGFR mutations'))  # Mutation status: exon 19 versus others
-number_mets = st.selectbox('Number of metastases', ('1 to 3', '4 or more')) #Number of metastatic 
-bone_or_liver_met = st.selectbox('Bone or liver metastases', ('Absent', 'Present')) #Presence of bone or liver metastases
-brain_met = st.selectbox('Brain metastases', ('Absent', 'Present')) #Presence of brain metastases
-comorbidity = st.selectbox('Comorbidities', ('Absent', 'Present')) #Presence of comorbidities
-smoking_status = st.selectbox('Smoking status', ('Never smoker', 'Ever smoker')) #Smoking history
-previous_treatment = st.selectbox('Has this patient recieved prior chemotherapy?', ('Yes', 'No')) #any treatment before?
+number_mets = st.selectbox('Number of metastases', ('1 to 3', '4 or more'))  # Number of metastases
+bone_or_liver_met = st.selectbox('Bone or liver metastases', ('Absent', 'Present'))  # Presence of bone or liver metastases
+brain_met = st.selectbox('Brain metastases', ('Absent', 'Present'))  # Presence of brain metastases
+comorbidity = st.selectbox('Comorbidities', ('Absent', 'Present'))  # Presence of comorbidities
+smoking_status = st.selectbox('Smoking status', ('Never smoker', 'Ever smoker'))  # Smoking history
+previous_treatment = st.selectbox('Has this patient received prior chemotherapy?', ('Yes', 'No'))  # Any treatment before?
 
-age = st.slider('Age', 18, 90, 60)  # Age: slider from 18 to 100
-log_age = np.log(age) # Apply log transformation to age
+age = st.slider('Age', 18, 90, 60)  # Age: slider from 18 to 90
+log_age = np.log(age)  # Apply log transformation to age
 
 # Input for neutrophil and lymphocyte counts
 neutrophil = st.text_input("Neutrophil count (x1000/mm3)")  # Neutrophil count
@@ -90,22 +106,21 @@ if neutrophil and lymphocyte:
         log_nlr = None
 else:
     log_nlr = None  # Avoids any warning if input is not provided yet
-    
+
 # Process categorical inputs into numerical values (assuming 0/1 encoding)
 gender_value = 1 if gender == 'Male' else 0
 ecog_cat_value = 1 if ecog_cat == '2 to 4' else 0
 mutation_status_value = 1 if mutation_status == 'Other EGFR mutations' else 0
 number_mets_value = 1 if number_mets == '4 or more' else 0
-bone_or_liver_met_value = 1 if bone_or_liver_met == 'Present' else 0    
-brain_met_value = 1 if brain_met == 'Present' else 0  
-comorbidity_value = 1 if comorbidity == 'Present' else 0 
+bone_or_liver_met_value = 1 if bone_or_liver_met == 'Present' else 0
+brain_met_value = 1 if brain_met == 'Present' else 0
+comorbidity_value = 1 if comorbidity == 'Present' else 0
 smoking_status_value = 1 if smoking_status == 'Ever smoker' else 0
-previous_treatment_value = 1 if previous_treatment == 'Yes' else 0 
-
+previous_treatment_value = 1 if previous_treatment == 'Yes' else 0
 
 # Create the input features array for the model
 patient_features = [log_age, log_nlr, gender_value, ecog_cat_value, mutation_status_value, number_mets_value,
-                    bone_or_liver_met_value, brain_met_value, comorbidity_value, smoking_status_value  ]
+                    bone_or_liver_met_value, brain_met_value, comorbidity_value, smoking_status_value]
 
 # Normalize features using the loaded scaler
 scaled_features = scaler.transform([patient_features])
@@ -116,24 +131,16 @@ def recommend_treatment(patient_features, previous_treatment_value):
     state_tensor = torch.tensor(patient_features, dtype=torch.float32).unsqueeze(0)
     
     # Get the Q-values for the patient features (state)
-    q_values = policy.q_net(state_tensor)
+    q_values = policy.q_net(state_tensor).cpu().detach().numpy().flatten()
     
-    # If previous treatment exists, restrict to actions 2 or 3
-    if previous_treatment_value == 1:
-        valid_actions = [2, 3]
-        q_values = q_values[:, valid_actions]  # Select only valid actions
-        top_values, top_indices = torch.topk(q_values, 2)  # Get top 2 Q-values
-        recommended_action = valid_actions[top_indices[0][0].item()]  # Best action (mapped to 2 or 3)
-        second_best_action = valid_actions[top_indices[0][1].item()]  # Second best action (mapped to 2 or 3)
-    else:
-        # Get top 2 Q-values for all actions (0, 1, 2, 3)
-        top_values, top_indices = torch.topk(q_values, 2)
-        recommended_action = top_indices[0][0].item()  # Best action
-        second_best_action = top_indices[0][1].item()  # Second best action
-    
-    return recommended_action, second_best_action
+    # Use Boltzmann exploration with tau=9 for action selection
+    recommended_action = boltzmann_action_selection(q_values, tau=9)
 
-# Collect patient features and compute as before...
+    # Get the second-best action
+    top_two_indices = np.argsort(q_values)[-2:]  # Top 2 Q-values
+    second_best_action = top_two_indices[0] if top_two_indices[1] == recommended_action else top_two_indices[1]
+
+    return recommended_action, second_best_action
 
 # Predict the recommended treatment when the user clicks the button
 if st.button('Get Treatment Recommendation', key='recommend_button'):
@@ -158,4 +165,3 @@ if st.button('Get Treatment Recommendation', key='recommend_button'):
         st.info("Reinforcement Learning Recommended Treatment (Second Best): 2nd or later Line, 1st generation TKI")
     elif second_best_action == 3:
         st.info("Reinforcement Learning Recommended Treatment (Second Best): 2nd or later line, 2nd or higher generation TKI")
-
