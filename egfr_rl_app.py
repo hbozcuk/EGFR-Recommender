@@ -147,20 +147,19 @@ def recommend_treatment(patient_features, previous_treatment_value):
         # The second-best action is simply the other valid action
         second_best_action = valid_actions[1 - selected_action_idx]  # Pick the other action
     else:
+        # If previous treatment = 0, favor action 1 more and penalize action 0
+        if previous_treatment_value == 0:
+            q_values[1] += 5  # Strongly favor action 1
+            q_values[3] += 2  # Slightly favor action 3
+            q_values[0] -= 2  # Penalize action 0 to avoid selection
+        
         # Use Boltzmann exploration with tau=9 for action selection among all actions (0, 1, 2, 3)
         recommended_action = boltzmann_action_selection(q_values, tau=9)
         recommended_action = int(recommended_action)  # Convert to Python int
         # Get the second-best action
         top_two_indices = np.argsort(q_values)[-2:]  # Top 2 Q-values
         second_best_action = top_two_indices[0] if top_two_indices[1] == recommended_action else top_two_indices[1]
-        
-        # Favor action 1 more, followed by action 3
-        if previous_treatment_value == 0:
-            if recommended_action == 1:
-                q_values[1] += 3  # Favor action 1 more
-            elif recommended_action == 3:
-                q_values[3] += 2  # Slight boost for action 3
-    
+
     return recommended_action, second_best_action
 
 # Predict the recommended treatment when the user clicks the button
