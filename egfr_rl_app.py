@@ -63,8 +63,8 @@ def boltzmann_action_selection(q_values, tau=5.0):
     return np.random.choice(range(len(q_values)), p=probabilities)
 
 with st.sidebar:
-    add_subheader = st.subheader("Reinforcement Learning based advisory system to guide EGFR TKI treatment for EGFR mutant, TKI naive, NSCLC cases.")
-    add_text = st.write("This is an AI application using Reinforcement Learning to guide treatment in patients with advanced, EGFR mutant NSCLC. Developed as an experimental tool for medical oncologists by Hakan Şat Bozcuk, MD, using data from 300+ EGFR mutant advanced NSCLC patients. This app aims to maximize progression free survival with TKI usage, in TKI naive patients.")
+    add_subheader = st.subheader("Reinforcement Learning based advisory system to guide intial EGFR TKI treatment for EGFR mutant, TKI naive, NSCLC cases.")
+    add_text = st.write("This is an AI application using Reinforcement Learning to guide treatment in patients with advanced, EGFR mutant NSCLC. Developed as an experimental tool for medical oncologists by Hakan Şat Bozcuk, MD, using data from 300+ EGFR mutant advanced NSCLC patients. This app aims to maximize progression free survival with initial TKI usage, in TKI naive patients.")
     from PIL import Image
     img = Image.open("image.jpg")
     st.image(img, width=300, caption="AI recommending treatment for NSCLC (Image by DALL-E)")
@@ -153,7 +153,7 @@ def recommend_treatment(patient_features, previous_treatment_value):
             q_values[0] -= 20  # Strongly favor action 1
             q_values[1] += 15  # Slightly favor action 3
             q_values[2] += 12  # Slightly favor action 3
-            q_values[3] += 20
+            q_values[3] += 30
         # Use Boltzmann exploration with tau=3 for action selection among all actions (0, 1, 2, 3)
         recommended_action = boltzmann_action_selection(q_values, tau=5)
         recommended_action = int(recommended_action)  # Convert to Python int
