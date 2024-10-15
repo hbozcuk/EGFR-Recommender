@@ -14,8 +14,6 @@ from sklearn.preprocessing import StandardScaler
 import joblib
 from gymnasium import spaces
 from stable_baselines3.dqn.policies import DQNPolicy
-
-
 import os
 
 # Get the port from the environment variable (default to 8501 if not set)
@@ -46,7 +44,7 @@ policy.load_state_dict(torch.load("dqn_policy.pth", map_location=torch.device('c
 # Load the saved scaler using joblib
 scaler = joblib.load("scaler.pkl")  # Ensure scaler.pkl is in the same directory
 
-# Boltzmann action selection function with tau=3
+# Boltzmann action selection function with tau=8
 def boltzmann_action_selection(q_values, tau=8.0):
     # Ensure no NaN values in Q-values
     if np.isnan(q_values).any():
@@ -63,8 +61,8 @@ def boltzmann_action_selection(q_values, tau=8.0):
     return np.random.choice(range(len(q_values)), p=probabilities)
 
 with st.sidebar:
-    add_subheader = st.subheader("Reinforcement Learning based advisory system to guide intial EGFR TKI treatment for EGFR mutant, TKI naive, NSCLC cases.")
-    add_text = st.write("This is an AI application using Reinforcement Learning to guide treatment in patients with advanced, EGFR mutant NSCLC. Developed as an experimental tool for medical oncologists by Hakan Şat Bozcuk, MD, using data from 300+ EGFR mutant advanced NSCLC patients. This app aims to maximize progression free survival with initial TKI usage, in TKI naive patients.")
+    add_subheader = st.subheader("Reinforcement Learning based advisory system to guide initial EGFR TKI treatment for EGFR mutant, TKI naive, NSCLC cases.")
+    add_text = st.write("This is an AI application using Reinforcement Learning to guide treatment in patients with advanced, EGFR mutant NSCLC. Developed as an experimental tool for medical oncologists by Hakan Şat Bozcuk, MD, using data from 300+ EGFR mutant advanced NSCLC patients. This app aims to maximize progression-free survival with initial TKI usage, in TKI naive patients.")
     from PIL import Image
     img = Image.open("image.jpg")
     st.image(img, width=300, caption="AI recommending treatment for NSCLC (Image by DALL-E)")
@@ -134,8 +132,10 @@ def recommend_treatment(patient_features, previous_treatment_value):
     # Get the Q-values for the patient features (state)
     q_values = policy.q_net(state_tensor).cpu().detach().numpy().flatten()
     
-    # If previous treatment exists, restrict to actions 2 or 3
+    # If previous treatment exists, modify rewards for actions 2 and 3
     if previous_treatment_value == 1:
+        q_values[2] -= 8  # Penalize action 2 slightly
+        q_values[3] += 16  # Strongly favor action 3
         valid_actions = [2, 3]
         q_values = q_values[valid_actions]  # Select only valid actions (2, 3)
         
@@ -150,11 +150,12 @@ def recommend_treatment(patient_features, previous_treatment_value):
     else:
         # If previous treatment = 0, favor action 1 more and penalize action 0
         if previous_treatment_value == 0:
-            q_values[0] -= 20  # Strongly favor action 1
-            q_values[1] += 15  # Slightly favor action 3
-            q_values[2] += 8  # Slightly favor action 3
-            q_values[3] += 70
-        # Use Boltzmann exploration with tau=3 for action selection among all actions (0, 1, 2, 3)
+            q_values[0] -= 20  # Penalize action 0
+            q_values[1] += 15  # Favor action 1
+            q_values[2] += 8   # Slightly favor action 2
+            q_values[3] += 20  # Strongly favor action 3
+        
+        # Use Boltzmann exploration with tau=8 for action selection among all actions (0, 1, 2, 3)
         recommended_action = boltzmann_action_selection(q_values, tau=8)
         recommended_action = int(recommended_action)  # Convert to Python int
         # Get the second-best action
