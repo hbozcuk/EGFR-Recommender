@@ -134,8 +134,8 @@ def recommend_treatment(patient_features, previous_treatment_value):
     
     # If previous treatment exists, modify rewards for actions 2 and 3
     if previous_treatment_value == 1:
-        q_values[2] -= 8  # Penalize action 2 slightly
-        q_values[3] += 16  # Strongly favor action 3
+        q_values[2] -= 20  # Penalize action 2 slightly
+        q_values[3] += 20  # Strongly favor action 3
         valid_actions = [2, 3]
         q_values = q_values[valid_actions]  # Select only valid actions (2, 3)
         
