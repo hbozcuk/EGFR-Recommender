@@ -152,7 +152,7 @@ def recommend_treatment(patient_features, previous_treatment_value):
         if previous_treatment_value == 0:
             q_values[1] += 15  # Strongly favor action 1
             q_values[3] += 3  # Slightly favor action 3
-            q_values[0] -= 5  # Penalize action 0 to avoid selection
+            q_values[0] -= 50  # Penalize action 0 to avoid selection
         
         # Use Boltzmann exploration with tau=3 for action selection among all actions (0, 1, 2, 3)
         recommended_action = boltzmann_action_selection(q_values, tau=12)
