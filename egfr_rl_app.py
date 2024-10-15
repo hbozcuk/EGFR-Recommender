@@ -150,8 +150,8 @@ def recommend_treatment(patient_features, previous_treatment_value):
     else:
         # If previous treatment = 0, favor action 1 more and penalize action 0
         if previous_treatment_value == 0:
-            q_values[0] -= 20  # Penalize action 0
-            q_values[1] += 19  # Favor action 1
+            q_values[0] -= 25  # Penalize action 0
+            q_values[1] += 20  # Favor action 1
             q_values[2] += 8   # Slightly favor action 2
             q_values[3] += 20  # Strongly favor action 3
         
