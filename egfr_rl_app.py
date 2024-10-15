@@ -47,7 +47,7 @@ policy.load_state_dict(torch.load("dqn_policy.pth", map_location=torch.device('c
 scaler = joblib.load("scaler.pkl")  # Ensure scaler.pkl is in the same directory
 
 # Boltzmann action selection function with tau=3
-def boltzmann_action_selection(q_values, tau=12.0):
+def boltzmann_action_selection(q_values, tau=5.0):
     # Ensure no NaN values in Q-values
     if np.isnan(q_values).any():
         raise ValueError("Q-values contain NaN. Check the model outputs.")
@@ -140,7 +140,7 @@ def recommend_treatment(patient_features, previous_treatment_value):
         q_values = q_values[valid_actions]  # Select only valid actions (2, 3)
         
         # Use Boltzmann exploration for valid actions
-        selected_action_idx = boltzmann_action_selection(q_values, tau=12)  # Index of valid action (0 or 1)
+        selected_action_idx = boltzmann_action_selection(q_values, tau=5)  # Index of valid action (0 or 1)
         
         # Map the selected index back to the original action (2 or 3)
         recommended_action = valid_actions[selected_action_idx]
@@ -150,12 +150,12 @@ def recommend_treatment(patient_features, previous_treatment_value):
     else:
         # If previous treatment = 0, favor action 1 more and penalize action 0
         if previous_treatment_value == 0:
-            q_values[1] += 5  # Strongly favor action 1
-            q_values[3] += 3  # Slightly favor action 3
-            q_values[0] -= 10 # Penalize action 0 to avoid selection
-        
+            q_values[0] -= 20  # Strongly favor action 1
+            q_values[1] += 20  # Slightly favor action 3
+            q_values[2] += 5  # Slightly favor action 3
+            q_values[3] += 10
         # Use Boltzmann exploration with tau=3 for action selection among all actions (0, 1, 2, 3)
-        recommended_action = boltzmann_action_selection(q_values, tau=12)
+        recommended_action = boltzmann_action_selection(q_values, tau=5)
         recommended_action = int(recommended_action)  # Convert to Python int
         # Get the second-best action
         top_two_indices = np.argsort(q_values)[-2:]  # Top 2 Q-values
