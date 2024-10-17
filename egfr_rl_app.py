@@ -38,7 +38,7 @@ policy = DQNPolicy(
     net_arch=[64, 64]  # Use the same architecture as during training
 )
 
-# Load the policy parameters
+# Load the policy parameters (pre-trained DQN model)
 policy.load_state_dict(torch.load("dqn_policy.pth", map_location=torch.device('cpu')))
 
 # Load the saved scaler using joblib
@@ -132,32 +132,24 @@ def recommend_treatment(patient_features, previous_treatment_value):
     # Get the Q-values for the patient features (state)
     q_values = policy.q_net(state_tensor).cpu().detach().numpy().flatten()
     
-    # If previous treatment exists, modify rewards for actions 2 and 3
+    # If previous treatment exists (1), restrict to actions 2 and 3
     if previous_treatment_value == 1:
-        q_values[2] -= 12  # Penalize action 2 slightly
-        q_values[3] += 12  # Strongly favor action 3
         valid_actions = [2, 3]
         q_values = q_values[valid_actions]  # Select only valid actions (2, 3)
         
         # Use Boltzmann exploration for valid actions
         selected_action_idx = boltzmann_action_selection(q_values, tau=8)  # Index of valid action (0 or 1)
-        
+
         # Map the selected index back to the original action (2 or 3)
         recommended_action = valid_actions[selected_action_idx]
         
         # The second-best action is simply the other valid action
         second_best_action = valid_actions[1 - selected_action_idx]  # Pick the other action
     else:
-        # If previous treatment = 0, favor action 1 more and penalize action 0
-        if previous_treatment_value == 0:
-            q_values[0] -= 25  # Penalize action 0
-            q_values[1] += 20  # Favor action 1
-            q_values[2] += 12   # Slightly favor action 2
-            q_values[3] += 40  # Strongly favor action 3
-        
-        # Use Boltzmann exploration with tau=8 for action selection among all actions (0, 1, 2, 3)
+        # If previous treatment = 0, all actions (0, 1, 2, 3) are available
         recommended_action = boltzmann_action_selection(q_values, tau=8)
         recommended_action = int(recommended_action)  # Convert to Python int
+
         # Get the second-best action
         top_two_indices = np.argsort(q_values)[-2:]  # Top 2 Q-values
         second_best_action = top_two_indices[0] if top_two_indices[1] == recommended_action else top_two_indices[1]
