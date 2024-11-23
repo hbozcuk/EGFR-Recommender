@@ -39,7 +39,7 @@ policy = DQNPolicy(
 )
 
 # Load the policy parameters (pre-trained DQN model)
-policy.load_state_dict(torch.load("dqn_policy.pth", map_location=torch.device('cpu')))
+policy.load_state_dict(torch.load("dqn_policy (3).pth", map_location=torch.device('cpu')))
 
 # Load the saved scaler using joblib
 scaler = joblib.load("scaler.pkl")  # Ensure scaler.pkl is in the same directory
